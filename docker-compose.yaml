@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  usmobile-lifeguard:
+    build: https://github.com/dbrand666/usmobile-lifeguard.git#main
+    container_name: usmobile-lifeguard
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    deploy:
+      restart_policy:
+        condition: none

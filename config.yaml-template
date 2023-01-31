@@ -1,0 +1,24 @@
+# Do everything except actually spending any money
+# Set this to false once you're sure your setup is right
+dryrun: true
+
+# Get the token and pool_id by logging into USMobile in a private window
+# The pool_id is in the url when you're on the pool detail page
+# The token is what follows "Bearer" in the "USMAuthorization" header for api.usmobile.com
+token: "ey..."
+pool_id: "bunch of hex"
+
+# How often should we check your balance?
+check_interval_minutes: 5
+
+# How many consecutive errors should make us give up?
+max_errors: 3
+
+# How low should we let the balance get?
+top_up_threshold_gb: 0.5
+
+# How much data should we buy at that point?
+top_up_gb: 1
+
+# What's the maximum amount of data you want to buy per cycle?
+max_gb: 5
