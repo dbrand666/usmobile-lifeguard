@@ -28,3 +28,5 @@ Well ok then. Go ahead and clone this repo or just copy the config.yaml-template
 3. Edit the rest of the values in the file to suit your preferences. There are comments in there that should be self-explanatory.
 4. To run the app, use the command: `docker compose up --build`.
 5. Keep an eye on the output. If it does anything unexpected kill it and check your configuration.
+6. It will give you a 10 second warning before performing a top up. That gives you a chance to kill it if you're watching.
+7. The config file can be changed while the application is running. The changes take affect on the next cycle - no need to restart.
