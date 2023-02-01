@@ -1,18 +1,52 @@
+from typing import Iterable
+
 import yaml
 import time
 
 import requests
 
+class Lifeguard:
+    base_url = 'https://api.usmobile.com/web-gateway/api/v1'
+
+    def __init__(self) -> None:
+        self.consecutive_errors = 0
+
+    def load_config(self) -> None:
+        self.config = yaml.safe_load(open('config.yaml'))
+
+        for attr in [
+            'dryrun',
+            'token', 'pool_id',
+            'check_interval_minutes',
+            'max_errors',
+            'top_up_threshold_gb', 'top_up_gb', 'max_gb'
+        ]:
+            if self.config.get(attr) is None:
+                raise Exception(f'Config file must specify "{attr}" attribute.')
+            setattr(self, attr, self.config[attr])
+
+    def get_pool_ids(self) -> Iterable[str]:
+        # Currently supports only one
+        return [ self.config['pool_id'] ]
+
+    def poll(self) -> None:
+        # Reload config on each iteration in case it changes
+        self.load_config()
+
+        for pool_id in self.get_pool_ids():
+            pool = Pool(self, pool_id)
+            if pool.get_pool_data():
+                pool.perform_topup()
+
 class Pool:
-    def __init__(self, lifeguard, pool_id) -> None:
+    def __init__(self, lifeguard: Lifeguard, pool_id: str) -> None:
         self.lifeguard = lifeguard
 
         self.base_topups = None
         self.topups_added = 0
 
-        base_url = 'https://api.usmobile.com/web-gateway/api/v1'
         self.pool_id = pool_id
-        self.get_pool_data_url = f'{base_url}/pools/{pool_id}'
+        self.get_pool_data_url = f'{lifeguard.base_url}/pools/{pool_id}'
         self.topup_url = f'{self.get_pool_data_url}/topUpAndBasePlan'
 
     def get_pool_data(self) -> bool:
@@ -38,7 +72,7 @@ class Pool:
         self.pool_data = pool_data
         return True
 
-    def perform_topup(self):
+    def perform_topup(self) -> None:
         lifeguard = self.lifeguard
 
         # Safety check. Make sure the topups we're buying are getting credited.
@@ -73,20 +107,19 @@ class Pool:
             if lifeguard.dryrun is not False:
                 print('Not actually buying more data - dryrun is true')
             else:
-                print('Buying more data.')
-
+                print('Buying more data in 10 seconds.')
+                time.sleep(10)
                 try:
-                    # requests.post(
-                    #     topup_url,
-                    #     headers={
-                    #         'USMAuthorization': 'Bearer ' + config['token'],
-                    #     },
-                    #     json={
-                    #         'creditCardToken': credit_card_token,
-                    #         'topUpSizeInGB': config['top_up_gb'],
-                    #     }
-                    # )
-                    pass
+                    requests.post(
+                        self.topup_url,
+                        headers={
+                            'USMAuthorization': 'Bearer ' + lifeguard.token,
+                        },
+                        json={
+                            'creditCardToken': credit_card_token,
+                            'topUpSizeInGB': str(lifeguard.top_up_gb),
+                        }
+                    )
                 except Exception as err:
                     print(f'Unexpected {err=}, {type(err)=}')
                     lifeguard.consecutive_errors += 1
@@ -95,39 +128,10 @@ class Pool:
                 else:
                     self.topups_added += 1
 
-class Lifeguard:
-    def __init__(self) -> None:
-        self.consecutive_errors = 0
-
-    def load_config(self) -> None:
-        self.config = yaml.safe_load(open('config.yaml'))
-
-        for attr in [
-            'dryrun',
-            'token', 'pool_id',
-            'check_interval_minutes',
-            'max_errors',
-            'top_up_threshold_gb', 'top_up_gb', 'max_gb'
-        ]:
-            if not self.config.get(attr):
-                raise Exception(f'Config file must specify "{attr}" attribute.')
-            setattr(self, attr, self.config[attr])
-
-    def get_pool_ids(self):
-        # Currently supports only one
-        return [ self.config['pool_id'] ]
-
 def main() -> None:
     lifeguard = Lifeguard()
-
     while True:
-        # Reload config on each iteration in case it changes
-        lifeguard.load_config()
-
-        for pool_id in lifeguard.get_pool_ids():
-            pool = Pool(lifeguard, pool_id)
-            if pool.get_pool_data():
-                pool.perform_topup()
+        lifeguard.poll()
 
         print(f'Sleeping for {lifeguard.check_interval_minutes} minutes.')
         time.sleep(lifeguard.check_interval_minutes * 60)

@@ -2,11 +2,10 @@
 # Set this to false once you're sure your setup is right
 dryrun: true
 
-# Get the token and pool_id by logging into USMobile in a private window
-# The pool_id is in the url when you're on the pool detail page
-# The token is what follows "Bearer" in the "USMAuthorization" header for api.usmobile.com
-token: "ey..."
-pool_id: "bunch of hex"
+# The token and pool_id MUST BE CONFIGURED
+# See the README file for setup instructions
+token: # eg. "ey..."
+pool_id: # eg. "bunch of hex"
 
 # How often should we check your balance?
 check_interval_minutes: 5
