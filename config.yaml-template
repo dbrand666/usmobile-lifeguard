@@ -8,7 +8,7 @@ token: # eg. "ey..."
 pool_id: # eg. "bunch of hex"
 
 # How often should we check your balance?
-check_interval_minutes: 5
+check_interval_minutes: 60
 
 # How many consecutive errors should make us give up?
 max_errors: 3
