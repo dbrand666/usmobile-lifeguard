@@ -2,6 +2,7 @@ from typing import Iterable
 
 import yaml
 import time
+import os
 
 import requests
 
@@ -9,10 +10,12 @@ class Lifeguard:
     base_url = 'https://api.usmobile.com/web-gateway/api/v1'
 
     def __init__(self) -> None:
+        self.config = {}
         self.consecutive_errors = 0
 
     def load_config(self) -> None:
-        self.config = yaml.safe_load(open('config.yaml'))
+        if os.path.exists('config.yaml'):
+            self.config = yaml.safe_load(open('config.yaml'))
 
         for attr in [
             'dryrun',
@@ -22,7 +25,10 @@ class Lifeguard:
             'top_up_threshold_gb', 'top_up_gb', 'max_gb'
         ]:
             if self.config.get(attr) is None:
-                raise Exception(f'Config file must specify "{attr}" attribute.')
+                e = os.environ.get(f'lifeguard_{attr}')
+                if e is None:
+                    raise Exception(f'Config file or env var must specify "{attr}" attribute.')
+                setattr(self, attr, e)
             setattr(self, attr, self.config[attr])
 
     def get_pool_ids(self) -> Iterable[str]:
