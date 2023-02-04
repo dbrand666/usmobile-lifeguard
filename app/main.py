@@ -10,10 +10,11 @@ class Lifeguard:
     base_url = 'https://api.usmobile.com/web-gateway/api/v1'
 
     def __init__(self) -> None:
-        self.config = {}
         self.consecutive_errors = 0
 
     def load_config(self) -> None:
+        self.config = {}
+
         if os.path.exists('config.yaml'):
             self.config = yaml.safe_load(open('config.yaml'))
 
@@ -24,12 +25,16 @@ class Lifeguard:
             'max_errors',
             'top_up_threshold_gb', 'top_up_gb', 'max_gb'
         ]:
-            if self.config.get(attr) is None:
-                e = os.environ.get(f'lifeguard_{attr}'.upper())
-                if e is None:
+            # env var first, then config file, else raise exception
+            val = os.environ.get(f'lifeguard_{attr}'.upper())
+            if val is not None:
+                setattr(self, attr, val)
+            else:
+                val = self.config.get(attr)
+                if val is not None:
+                    setattr(self, attr, val)
+                else:
                     raise Exception(f'Config file or env var must specify "{attr}" attribute.')
-                setattr(self, attr, e)
-            setattr(self, attr, self.config[attr])
 
     def get_pool_ids(self) -> Iterable[str]:
         # Currently supports only one
@@ -140,7 +145,7 @@ def main() -> None:
         lifeguard.poll()
 
         print(f'Sleeping for {lifeguard.check_interval_minutes} minutes.')
-        time.sleep(float(lifeguard.check_interval_minutes * 60))
+        time.sleep(float(lifeguard.check_interval_minutes) * 60)
 
 if __name__ == '__main__':
     main()
