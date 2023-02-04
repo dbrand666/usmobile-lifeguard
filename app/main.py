@@ -25,7 +25,7 @@ class Lifeguard:
             'top_up_threshold_gb', 'top_up_gb', 'max_gb'
         ]:
             if self.config.get(attr) is None:
-                e = os.environ.get(f'lifeguard_{attr}')
+                e = os.environ.get(f'lifeguard_{attr}'.upper())
                 if e is None:
                     raise Exception(f'Config file or env var must specify "{attr}" attribute.')
                 setattr(self, attr, e)
