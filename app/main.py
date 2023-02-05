@@ -40,7 +40,7 @@ class Lifeguard:
         # Currently supports only one
         return [ self.config['pool_id'] ]
 
-    def poll(self) -> None:
+    def poll(self) -> bool:
         # Reload config on each iteration in case it changes
         self.load_config()
 
@@ -48,6 +48,8 @@ class Lifeguard:
             pool = Pool(self, pool_id)
             if pool.get_pool_data():
                 pool.perform_topup()
+
+        return self.config["check_interval_minutes"] > 0
 
 class Pool:
     def __init__(self, lifeguard: Lifeguard, pool_id: str) -> None:
@@ -141,11 +143,11 @@ class Pool:
 
 def main() -> None:
     lifeguard = Lifeguard()
-    while True:
-        lifeguard.poll()
-
+    while lifeguard.poll():
         print(f'Sleeping for {lifeguard.check_interval_minutes} minutes.')
         time.sleep(float(lifeguard.check_interval_minutes) * 60)
+
+    print('Exiting gracefully')
 
 if __name__ == '__main__':
     main()

@@ -7,7 +7,7 @@ dryrun: true
 token: # eg. "ey..."
 pool_id: # eg. "bunch of hex"
 
-# How often should we check your balance?
+# How often should we check your balance?  Use 0 or less to only check once then exit (allows for cloud scheduling).
 check_interval_minutes: 60
 
 # How many consecutive errors should make us give up?
