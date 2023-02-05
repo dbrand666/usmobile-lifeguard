@@ -2,6 +2,7 @@ from typing import Iterable
 
 import yaml
 import time
+import os
 
 import requests
 
@@ -12,7 +13,10 @@ class Lifeguard:
         self.consecutive_errors = 0
 
     def load_config(self) -> None:
-        self.config = yaml.safe_load(open('config.yaml'))
+        self.config = {}
+
+        if os.path.exists('config.yaml'):
+            self.config = yaml.safe_load(open('config.yaml'))
 
         for attr in [
             'dryrun',
@@ -21,9 +25,16 @@ class Lifeguard:
             'max_errors',
             'top_up_threshold_gb', 'top_up_gb', 'max_gb'
         ]:
-            if self.config.get(attr) is None:
-                raise Exception(f'Config file must specify "{attr}" attribute.')
-            setattr(self, attr, self.config[attr])
+            # env var first, then config file, else raise exception
+            val = os.environ.get(f'lifeguard_{attr}'.upper())
+            if val is not None:
+                setattr(self, attr, val)
+            else:
+                val = self.config.get(attr)
+                if val is not None:
+                    setattr(self, attr, val)
+                else:
+                    raise Exception(f'Config file or env var must specify "{attr}" attribute.')
 
     def get_pool_ids(self) -> Iterable[str]:
         # Currently supports only one
@@ -62,7 +73,7 @@ class Pool:
         except Exception as err:
             print(f'Unexpected {err=}, {type(err)=}')
             lifeguard.consecutive_errors += 1
-            if lifeguard.consecutive_errors >= lifeguard.max_errors:
+            if lifeguard.consecutive_errors >= int(lifeguard.max_errors):
                 raise Exception('Too many errors. Giving up.')
             self.pool_data = None
             return False
@@ -91,20 +102,20 @@ class Pool:
             print(f'Current data limit could not be retrieved, will retry.')
             return
 
-        if balance_in_gb >= lifeguard.top_up_threshold_gb:
+        if balance_in_gb >= float(lifeguard.top_up_threshold_gb):
             print(
                 'You still have enough data: '
                 f'Data remaining {balance_in_gb}, '
                 f'Threshold {lifeguard.top_up_threshold_gb}'
             )
-        elif current_data_limit >= lifeguard.max_gb:
+        elif current_data_limit >= float(lifeguard.max_gb):
             print(
                 "You've exceeded your maximum quota: "
                 f'Current data limit {current_data_limit}, '
                 f'Max data limit {lifeguard.max_gb}'
             )
         else:
-            if lifeguard.dryrun is not False:
+            if bool(lifeguard.dryrun) is not False:
                 print('Not actually buying more data - dryrun is true')
             else:
                 print('Buying more data in 10 seconds.')
@@ -134,7 +145,7 @@ def main() -> None:
         lifeguard.poll()
 
         print(f'Sleeping for {lifeguard.check_interval_minutes} minutes.')
-        time.sleep(lifeguard.check_interval_minutes * 60)
+        time.sleep(float(lifeguard.check_interval_minutes) * 60)
 
 if __name__ == '__main__':
     main()
