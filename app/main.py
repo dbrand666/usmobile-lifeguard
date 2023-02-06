@@ -133,7 +133,7 @@ class Pool:
                 f'Max data limit {lifeguard.max_gb}'
             )
         else:
-            if configured_bool(lifeguard.dryrun) is True:
+            if lifeguard.dryrun is True:
                 print('Not actually buying more data - dryrun is true')
             else:
                 delay = self.config['top_up_delay_seconds']
