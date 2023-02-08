@@ -31,3 +31,4 @@ Well ok then. Go ahead and clone this repo or just copy the config.yaml-template
 5. Keep an eye on the output. If it does anything unexpected kill it and check your configuration.
 6. It will give you a 10 second warning before performing a top up. That gives you a chance to kill it if you're watching.
 7. The config file can be changed while the application is running. The changes take affect on the next cycle - no need to restart.
+8. If you want to run the script on a cron schedule or some cloud scheduler and have it exit after one check, set `check_interval_minutes` to `0` or less.

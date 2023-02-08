@@ -7,7 +7,8 @@ dryrun: true
 token: # eg. "ey..."
 pool_id: # eg. "bunch of hex"
 
-# How often should we check your balance?
+# How often should we check your balance?  Use 0 or less to only check once then exit (allows for cloud scheduling).
+# NOTE: if you set this to 0 or less, make sure to also set max_errors to 0 or less.
 check_interval_minutes: 60
 
 # How many consecutive errors should make us give up?
@@ -18,6 +19,9 @@ top_up_threshold_gb: 0.5
 
 # How much data should we buy at that point?
 top_up_gb: 1
+
+# Seconds to delay before actually topping up; set to zero or less to topup without delay.
+top_up_delay_seconds: 10
 
 # What's the maximum amount of data you want to buy per cycle?
 max_gb: 5
