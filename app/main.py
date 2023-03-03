@@ -1,15 +1,18 @@
 from typing import Iterable
 
-import yaml
-import time
 import os
-import sys
 import requests
+import sys
+import time
+import traceback
+import yaml
 
 
 def configured_bool(it) -> bool:
     """Returns False is arg is literally 'false' in any casing, else True"""
     # This is used in case a boolean config parameter is given as a string env var.
+    if it is None:
+        return None
     return str(it).lower().strip() != 'false'
 
 
@@ -86,6 +89,9 @@ class Pool:
                     'USMAuthorization': 'Bearer ' + lifeguard.token,
                 }
             )
+            pool_data = response.json()
+            response.raise_for_status()
+            self.pool_data = pool_data
         except Exception as err:
             print(f'Unexpected {err=}, {type(err)=}')
             lifeguard.consecutive_errors += 1
@@ -95,8 +101,6 @@ class Pool:
             return False
 
         lifeguard.consecutive_errors = 0
-        pool_data = response.json()
-        self.pool_data = pool_data
         return True
 
     def perform_topup(self) -> None:
@@ -150,10 +154,10 @@ class Pool:
                         }
                     )
                 except Exception as err:
-                    print(f'Unexpected {err=}, {type(err)=}')
-                    lifeguard.consecutive_errors += 1
                     if lifeguard.consecutive_errors > lifeguard.max_errors:
                         raise Exception('Too many errors. Giving up.')
+                    print(f'Unexpected {err=}, {type(err)=}')
+                    lifeguard.consecutive_errors += 1
                 else:
                     self.topups_added += 1
 
@@ -164,22 +168,15 @@ def main() -> None:
         while True:
             lifeguard.poll()
 
-            if lifeguard.config["check_interval_minutes"] > 0:
-                print(f'Sleeping for {lifeguard.check_interval_minutes} minutes.')
-                time.sleep(lifeguard.check_interval_minutes * 60)
-            else:
+            if lifeguard.config["check_interval_minutes"] <= 0:
                 break
+
+            print(f'Sleeping for {lifeguard.check_interval_minutes} minutes.')
+            time.sleep(lifeguard.check_interval_minutes * 60)
 
         sys.exit(0)
     except Exception as e:
-        while True:
-            print(e, file=sys.stderr)
-            e = e.__cause__
-            if e is None:
-                break
-            else:
-                print('caused by:', file=sys.stderr)
-
+        traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
 
