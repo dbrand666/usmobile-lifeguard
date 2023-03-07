@@ -138,7 +138,7 @@ class Pool:
             if lifeguard.dryrun is True:
                 print('Not actually buying more data - dryrun is true')
             else:
-                delay = self.config['top_up_delay_seconds']
+                delay = lifeguard.config['top_up_delay_seconds']
                 if delay > 0:
                     print(f'Buying more data in {delay} seconds.')
                     time.sleep(delay)
