@@ -143,16 +143,17 @@ class Pool:
                     print(f'Buying more data in {delay} seconds.')
                     time.sleep(delay)
                 try:
-                    requests.post(
+                    response = requests.post(
                         self.topup_url,
                         headers={
                             'USMAuthorization': 'Bearer ' + lifeguard.token,
                         },
                         json={
                             'creditCardToken': credit_card_token,
-                            'topUpSizeInGB': str(lifeguard.top_up_gb),
+                            'topUpSizeInGB': lifeguard.top_up_gb,
                         }
                     )
+                    response.raise_for_status()
                 except Exception as err:
                     if lifeguard.consecutive_errors > lifeguard.max_errors:
                         raise Exception('Too many errors. Giving up.')
