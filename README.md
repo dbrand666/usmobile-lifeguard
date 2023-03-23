@@ -16,8 +16,9 @@ You've been warned.
 
 Well ok then. Go ahead and clone this repo or just copy the config.yaml-template file and docker-compose.yaml file to a local directory.
 
-1. Rename the config file to config.yaml.
-   2. You can also configure any setting via an environment variable upper-cased & prefaced with `LIFEGUARD_`.
+1. Rename the config template file to config.yaml: `cp config.yaml-template config.yaml`
+    1. Make an extra hard link to the config file: `ln config.yaml config.yaml-dont-move-me-vim`. You can ignore this link and it can be named whatever you want. It's just there to keep certain editors from changing the inode number when you edit the file.
+    2. By the way, you can also configure any setting via an environment variable upper-cased & prefaced with `LIFEGUARD_`. Any setting specified in the environment will override the corresponding setting in the config file.
 2. You need to get the app an authentication token and a pool id. To accomplish this:
     1. Log into your USMobile account in a private window.
     2. Navigate to the pool detail page for the pool you want it to watch. It'll have a URL that looks something like https://app.usmobile.com/dashboard/app/pools/ffffffff.
