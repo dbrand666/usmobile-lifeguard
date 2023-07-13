@@ -1,2 +1,5 @@
 pyyaml
 requests
+selenium
+webdriver-manager
+pyvirtualdisplay
