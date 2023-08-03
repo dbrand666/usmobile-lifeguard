@@ -20,7 +20,7 @@ Well ok then. Go ahead and clone this repo or just copy the config.yaml-template
 1. Rename the config template file to config.yaml: `cp config.yaml-template config.yaml`
     1. Make an extra hard link to the config file: `ln config.yaml config.yaml-dont-move-me-vim`. You can ignore this link and it can be named whatever you want. It's just there to keep certain editors from changing the inode number when you edit the file.
     2. By the way, you can also configure any setting via an environment variable upper-cased & prefaced with `LIFEGUARD_`. Any setting specified in the environment will override the corresponding setting in the config file.
-2. Invite a new user to your account that will only be used for scripting. It only needs `viewer` privileges. Do not enable 2FA for this user but do give it a really long complex password. Set the `username` and `password` fields in either config.yaml or your environment.
+2. Invite a new user to your account that will only be used for scripting. It only needs `contributor` privileges. Do not enable 2FA for this user but do give it a really long complex password. Set the `username` and `password` fields in either config.yaml or your environment.
 3. Edit the rest of the values in the file to suit your preferences. There are comments in there that should be self-explanatory.
 4. To run the app, use the command: `docker compose up --build`.
 5. Keep an eye on the output. If it does anything unexpected kill it and check your configuration.
