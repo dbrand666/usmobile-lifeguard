@@ -86,10 +86,10 @@ class Pool:
     def get_pool_data(self) -> bool:
         lifeguard = self.lifeguard
 
+        response = None
         try:
             if not lifeguard.token:
                 lifeguard.token = get_token(lifeguard.username, lifeguard.password)
-            response = None
             response = requests.get(
                 self.get_pool_data_url,
                 headers={
