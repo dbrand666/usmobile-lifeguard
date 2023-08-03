@@ -89,6 +89,7 @@ class Pool:
         try:
             if not lifeguard.token:
                 lifeguard.token = get_token(lifeguard.username, lifeguard.password)
+            response = None
             response = requests.get(
                 self.get_pool_data_url,
                 headers={
@@ -99,12 +100,14 @@ class Pool:
             response.raise_for_status()
             self.pool_data = pool_data
         except Exception as err:
-            print(f'Unexpected {err=}, {type(err)=}')
+            # The occasional 500 error is not *really* unexpected
+            if response is None or response.status_code != 500:
+                print(f'Unexpected {err=}, {type(err)=}')
+                lifeguard.token = None
             lifeguard.consecutive_errors += 1
             if lifeguard.consecutive_errors >= lifeguard.max_errors:
                 raise Exception('Too many errors. Giving up.')
             self.pool_data = None
-            lifeguard.token = None
             return False
 
         lifeguard.consecutive_errors = 0
