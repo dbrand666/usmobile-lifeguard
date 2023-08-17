@@ -7,6 +7,8 @@ import time
 import traceback
 import yaml
 
+from captcha import get_token
+
 
 def configured_bool(it) -> bool:
     """Returns False is arg is literally 'false' in any casing, else True"""
@@ -21,7 +23,8 @@ class Lifeguard:
 
     config_types = {
         'dryrun': configured_bool,
-        'token': str,
+        'username': str,
+        'password': str,
         'pool_id': str,
         'check_interval_minutes': float,
         'max_errors': int,
@@ -33,6 +36,7 @@ class Lifeguard:
 
     def __init__(self) -> None:
         self.consecutive_errors = 0
+        self.token = None
 
     def load_config(self) -> None:
         self.config = {}
@@ -82,7 +86,10 @@ class Pool:
     def get_pool_data(self) -> bool:
         lifeguard = self.lifeguard
 
+        response = None
         try:
+            if not lifeguard.token:
+                lifeguard.token = get_token(lifeguard.username, lifeguard.password)
             response = requests.get(
                 self.get_pool_data_url,
                 headers={
@@ -93,7 +100,10 @@ class Pool:
             response.raise_for_status()
             self.pool_data = pool_data
         except Exception as err:
-            print(f'Unexpected {err=}, {type(err)=}')
+            # The occasional 500 error is not *really* unexpected
+            if response is None or response.status_code != 500:
+                print(f'Unexpected {err=}, {type(err)=}')
+                lifeguard.token = None
             lifeguard.consecutive_errors += 1
             if lifeguard.consecutive_errors >= lifeguard.max_errors:
                 raise Exception('Too many errors. Giving up.')

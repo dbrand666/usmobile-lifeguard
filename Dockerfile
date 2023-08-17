@@ -1,10 +1,10 @@
-FROM python:alpine
+FROM python
 
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt && rm requirements.txt
+RUN apt update && apt install -y chromium xvfb && pip install -r requirements.txt && rm requirements.txt
 
 COPY ./app .
 
-CMD [ "python", "-u", "main.py" ]
+CMD [ "python", "-u", "-m", "main" ]

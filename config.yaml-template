@@ -2,10 +2,11 @@
 # Set this to false once you're sure your setup is right
 dryrun: true
 
-# The token and pool_id MUST BE CONFIGURED
+# The pool_id, username, and password MUST BE CONFIGURED
 # See the README file for setup instructions
-token: # eg. "ey..."
 pool_id: # eg. "bunch of hex"
+username: # create a user with a "viewer" role
+password: # password for the viewer
 
 # How often should we check your balance?  Use 0 or less to only check once then exit (allows for cloud scheduling).
 # NOTE: if you set this to 0 or less, make sure to also set max_errors to 0 or less.

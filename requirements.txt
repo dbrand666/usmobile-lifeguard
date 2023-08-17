@@ -1,2 +1,4 @@
-pyyaml
-requests
+PyVirtualDisplay==3.0
+PyYAML==6.0.1
+requests==2.31.0
+selenium==4.11.2
