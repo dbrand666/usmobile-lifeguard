@@ -1,13 +1,16 @@
 from typing import Iterable
 
 import os
-import requests
+import cloudscraper
 import sys
 import time
 import traceback
 import yaml
 
 from captcha import get_token
+
+
+requests = cloudscraper.create_scraper()
 
 
 def configured_bool(it) -> bool:
@@ -96,8 +99,8 @@ class Pool:
                     'USMAuthorization': 'Bearer ' + lifeguard.token,
                 }
             )
-            pool_data = response.json()
             response.raise_for_status()
+            pool_data = response.json()
             self.pool_data = pool_data
         except Exception as err:
             # The occasional 500 error is not *really* unexpected
@@ -106,7 +109,7 @@ class Pool:
                 lifeguard.token = None
             lifeguard.consecutive_errors += 1
             if lifeguard.consecutive_errors >= lifeguard.max_errors:
-                raise Exception('Too many errors. Giving up.')
+                raise Exception('Too many errors. Giving up.') from err
             self.pool_data = None
             return False
 
@@ -166,7 +169,7 @@ class Pool:
                     response.raise_for_status()
                 except Exception as err:
                     if lifeguard.consecutive_errors > lifeguard.max_errors:
-                        raise Exception('Too many errors. Giving up.')
+                        raise Exception('Too many errors. Giving up.') from err
                     print(f'Unexpected {err=}, {type(err)=}')
                     lifeguard.consecutive_errors += 1
                 else:
