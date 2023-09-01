@@ -1,13 +1,16 @@
 from typing import Iterable
 
 import os
-import requests
+import cloudscraper
 import sys
 import time
 import traceback
 import yaml
 
 from captcha import get_token
+
+
+requests = cloudscraper.create_scraper()
 
 
 def configured_bool(it) -> bool:
